@@ -1,0 +1,36 @@
+# editorconfig.org
+
+# .editorconfig設置ディレクトリ以上の.editorconfigを反映させないようroot明記
+root = true
+
+[*]
+# インデントは「スペース使用」
+indent_style = space
+
+# インデントは「スペース2つ」
+indent_size = 2
+
+# 改行コードは「lf」
+end_of_line = crlf
+
+# charsetは「utf-8」
+charset = utf-8
+
+# 行末のスペース削除
+trim_trailing_whitespace = true
+
+# 保存時最終行に1行追加
+insert_final_newline = true
+
+[*.md]
+# 行末のスペース削除しない
+trim_trailing_whitespace = false
+
+[*.sh]
+end_of_line = lf
+
+[*.liquid]
+insert_final_newline = false
+
+[*.json]
+insert_final_newline = false

@@ -1,0 +1,58 @@
+/*!********************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[2].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[2].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[2].use[3]!./src/css/common.scss ***!
+  \********************************************************************************************************************************************************************************************************************************************/
+* {
+  padding: 0;
+  margin: 0;
+}
+
+.js_logger {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  font-size: 12px;
+  color: #fff;
+  background-color: rgba(0, 0, 0, 0.8);
+  padding: 0.5em;
+}
+
+.js_center {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0.8;
+  pointer-events: none;
+}
+.js_center::before, .js_center::after {
+  content: "";
+  position: absolute;
+  background-color: #000;
+  flex-shrink: 0;
+}
+.js_center::before {
+  width: 20px;
+  height: 1px;
+  border-bottom: 1px solid #fff;
+}
+.js_center::after {
+  width: 1px;
+  height: 20px;
+  border-left: 1px solid #fff;
+}
+
+.js_cube {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100px;
+  height: 100px;
+  margin-left: -50px;
+  margin-top: -50px;
+  background: #10e;
+}
+
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2h0ZG9jcy9hc3NldHMvY3NzL2NvbW1vbi5jc3MiLCJtYXBwaW5ncyI6Ijs7O0FBQUE7RUFDRTtFQUNBO0FBQ0Y7O0FBRUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtBQUNGOztBQUdBO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0FBQUY7QUFDRTtFQUVFO0VBQ0E7RUFDQTtFQUNBO0FBQUo7QUFFRTtFQUNFO0VBQ0E7RUFDQTtBQUFKO0FBRUU7RUFDRTtFQUNBO0VBQ0E7QUFBSjs7QUFJQTtFQUNFO0VBQ0E7RUFDQTtFQUVBLFlBRE87RUFFUCxhQUZPO0VBR1A7RUFDQTtFQUNBO0FBRkYsQyIsInNvdXJjZXMiOlsid2VicGFjazovLy8uL3NyYy9jc3MvY29tbW9uLnNjc3MiXSwibmFtZXMiOltdLCJzb3VyY2VSb290IjoiIn0=*/
