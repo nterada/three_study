@@ -26,7 +26,12 @@ const cube = document.getElementById('js_cube');
 
 let x = 0;
 let vx = 0;
-const friction = 0.72;
+let h = 0;
+let y = 0;
+let vy = 0;
+// const friction = 0.72;
+const friction = .45;
+// const friction = .6;
 
 //requestAnimationFrame（60fps固定）
 Ticker.onUpdate(()=> {
@@ -37,8 +42,41 @@ Ticker.onUpdate(()=> {
   //todo ここに毎フレームの処理を書く
   // x += 1;
   // x += (_mouseX - x) * 0.1;
+
+
   vx += (_mouseX - x) * 0.1;
   vx *= friction;
   x += vx;
+
+
+  if(_mouseX < 0) {
+    h += (_mouseX + h) * -0.1;
+  } else {
+    h += (_mouseX - h) * 0.1;
+  }
+  console.log(h);
+  h *= friction;
+  h += h;
+
+
+  // vy += (_mouseY - y) * 0.1;
+  // vy += (_mouseY - y) * 0.1;
+  // vy *= .04;
+  // y += vy;
+
+  if(_mouseY < 0) {
+    // h += (_mouseX + h) * -0.1;
+    cube.style.top = `50%`;
+    cube.style.background = `red`;
+
+  } else {
+    // h += (_mouseX - h) * 0.1;
+    cube.style.bottom = `50%`;
+    cube.style.top = `auto`;
+    cube.style.background = `blue`;
+  }
+
+
   cube.style.transform = `translate(${x}px, 0)`;
+  cube.style.height = `${h}px`;
 });
