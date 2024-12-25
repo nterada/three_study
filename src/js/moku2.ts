@@ -64,7 +64,7 @@ Ticker.onUpdate(()=> {
   // vy *= .04;
   // y += vy;
 
-  if(_mouseY < 0) {
+  if(_mouseX < 0) {
     // h += (_mouseX + h) * -0.1;
     cube.style.top = `50%`;
     cube.style.background = `red`;
