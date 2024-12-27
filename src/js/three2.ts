@@ -81,7 +81,9 @@ class ThreeApp {
 
   static SPOT_LIGHT_PARAM = {
     // color: 0xffffff, // 光の色
-    color:  0xf0f0f0, // 光の色
+    // color:  0xf0f0f0, // 光の色
+    color:  0xf00000, // 光の色
+    // intensity: 0.1,  // 光の強度
     intensity: 0.1,  // 光の強度
   };
 
@@ -189,6 +191,7 @@ class ThreeApp {
     this.spotlight.angle = Math.PI / 5; // 光の広がり角度（45度）
     this.spotlight.penumbra = 1;  // 光の端のぼかし具合
     this.spotlight.decay = 2;  // 減衰
+    // this.spotlight.decay = 10;  // 減衰
     this.spotlight.distance = 10;
 
     const spotLightHelper = new THREE.SpotLightHelper( this.spotlight );
@@ -223,8 +226,8 @@ class ThreeApp {
     this.geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
 
     // this.material = new THREE.MeshBasicMaterial(ThreeApp.MATERIAL_PARAM);
-    this.material = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
-    // this.material = new THREE.MeshStandardMaterial(ThreeApp.MATERIAL_PARAM);
+    // this.material = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
+    this.material = new THREE.MeshStandardMaterial(ThreeApp.MATERIAL_PARAM);
     this.box = new THREE.Mesh(this.geometry, this.material);
     this.scene.add(this.box);
 
