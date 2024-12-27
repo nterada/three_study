@@ -46,7 +46,7 @@ class ThreeApp {
     near: 0.1,
     // 描画する空間のファークリップ面（最遠面）
     // far: 20.0,
-    far: 60.0,
+    far: 100.0,
     // カメラの座標
     position: new THREE.Vector3(0.0, 2.0, 10.0),
     // カメラの注視点
@@ -149,7 +149,8 @@ class ThreeApp {
       ThreeApp.CAMERA_PARAM.near,
       ThreeApp.CAMERA_PARAM.far,
     );
-    this.camera.position.copy(ThreeApp.CAMERA_PARAM.position);
+    // this.camera.position.copy(ThreeApp.CAMERA_PARAM.position);
+    this.camera.position.set(10, 10, 30);
     this.camera.lookAt(ThreeApp.CAMERA_PARAM.lookAt);
 
     // コントロール
@@ -189,10 +190,10 @@ class ThreeApp {
     // this.scene.add(this.spotlight.target);
 
     this.spotlight.angle = Math.PI / 5; // 光の広がり角度（45度）
-    this.spotlight.penumbra = 1;  // 光の端のぼかし具合
+    this.spotlight.penumbra = 0.2;  // 光の端のぼかし具合
     this.spotlight.decay = 2;  // 減衰
     // this.spotlight.decay = 10;  // 減衰
-    this.spotlight.distance = 10;
+    this.spotlight.distance = 8;
 
     const spotLightHelper = new THREE.SpotLightHelper( this.spotlight );
     this.scene.add( spotLightHelper );
@@ -226,8 +227,8 @@ class ThreeApp {
     this.geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
 
     // this.material = new THREE.MeshBasicMaterial(ThreeApp.MATERIAL_PARAM);
-    // this.material = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
-    this.material = new THREE.MeshStandardMaterial(ThreeApp.MATERIAL_PARAM);
+    this.material = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
+    // this.material = new THREE.MeshStandardMaterial(ThreeApp.MATERIAL_PARAM);
     this.box = new THREE.Mesh(this.geometry, this.material);
     this.scene.add(this.box);
 
