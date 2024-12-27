@@ -101,7 +101,9 @@ class ThreeApp {
   spotlight;
 
 
+  sphere
   group;
+  spheres;
 
 
   spotLightHelper;
@@ -241,7 +243,62 @@ class ThreeApp {
 
 
     this.group = new THREE.Group();
+
     this.scene.add(this.group);
+
+
+
+
+
+    const radius = 5; // 円の半径
+    const numSpheres = 8; // 配置する球体の数
+
+
+    this.spheres = [];
+
+    for (let i = 0; i < numSpheres; i++) {
+      const angle = (i / numSpheres) * Math.PI * 2; // 角度を均等に分ける
+      console.log(angle);
+      const x = radius * Math.cos(angle); // x座標
+      const z = radius * Math.sin(angle); // z座標
+
+      // 球体のジオメトリ
+      const sphereGeometry = new THREE.SphereGeometry(.3, 32, 32);
+      const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0x3399ff }); // 色を変更することもできます
+      this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+      // 球体の位置を設定
+      this.sphere.position.set(x, 1, z); // 高さyは1に設定
+
+      // シーンに追加
+      this.scene.add(this.sphere);
+      this.group.add(this.sphere);  // ここでグループに追加
+      this.spheres.push(this.sphere); // 配列に追加
+    }
+
+    console.log(this.spheres);
+
+    this.scene.add(this.spheres);
+
+    this.group.add(this.box);
+    this.group.add(this.spheres);
+
+
+
+    for (let i = 0; i < 10; i++) {
+      const groupCopy = this.group.clone(); // groupを複製
+
+      // 各複製の位置を調整（y軸方向に5単位ずつずらす）
+      groupCopy.position.y = i * 5;  // 例えば、y軸方向に5単位ずつ配置
+
+      // 複製したgroupをシーンに追加
+      this.scene.add(groupCopy);
+    }
+
+
+
+
+
 
   }
 
@@ -255,8 +312,35 @@ class ThreeApp {
 
     this.box.position.y = 1 * (Math.sin(time * .4) + 1) + 1
     this.box.rotation.x += .01
-    this.box.rotation.y -= .008
+    this.box.rotation.y -= .01
     this.box.rotation.z -= .005
+
+
+
+
+    for (let i = 0; i < this.spheres.length; i++) {
+      const sphere = this.spheres[i];
+
+      // 各球体の位置と回転をアニメーション
+      sphere.position.y = i * (Math.sin(time * 0.4) + 1) + 1;
+      sphere.rotation.x += 0.01;
+      sphere.rotation.y -= 0.01;
+      sphere.rotation.z -= 0.005;
+    }
+
+
+    // this.spheres.position.y = 1 * (Math.sin(time * .4) + 1) + 1
+    // this.spheres.rotation.x += .01
+    // this.spheres.rotation.y -= .01
+    // this.spheres.rotation.z -= .005
+
+
+    // this.group.position.y = 1 * (Math.sin(time * .4) + 1) + 1
+    // this.group.rotation.x += .01
+    // this.group.rotation.y -= .008
+    // this.group.rotation.z -= .005
+
+
     // コントロールを更新
     this.controls.update();
 
