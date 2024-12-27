@@ -190,7 +190,7 @@ class ThreeApp {
     // this.scene.add(this.spotlight.target);
 
     this.spotlight.angle = Math.PI / 5; // 光の広がり角度（45度）
-    this.spotlight.penumbra = 0.2;  // 光の端のぼかし具合
+    this.spotlight.penumbra = 0.1;  // 光の端のぼかし具合
     this.spotlight.decay = 2;  // 減衰
     // this.spotlight.decay = 10;  // 減衰
     this.spotlight.distance = 8;
