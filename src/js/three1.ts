@@ -3,6 +3,31 @@ import * as THREE from '../lib/three.module.js';
 import { OrbitControls } from '../lib/OrbitControls.js';
 
 
+
+//windowサイズ取得
+let _windowWidth:number;
+let _windowHeight:number;
+const resized = ()=> {
+  _windowWidth = window.innerWidth;
+  _windowHeight = window.innerHeight;
+  // Logger.add('window-width', _windowWidth);
+  // Logger.add('window-height', _windowHeight);
+}
+window.addEventListener('resize', resized);
+resized();
+
+//マウス座標取得
+let _mouseX:number = 0;
+let _mouseY:number = 0;
+window.addEventListener('mousemove', (e) => {
+  _mouseX = e.clientX - (_windowWidth * 0.5);
+  _mouseX = _mouseX *  0.1;
+  _mouseY = e.clientY - (_windowHeight * 0.5);
+});
+
+
+
+
 window.addEventListener('DOMContentLoaded', () => {
   const wrapper = document.querySelector('#webgl');
   const app = new ThreeApp(wrapper);
@@ -10,16 +35,18 @@ window.addEventListener('DOMContentLoaded', () => {
 }, false);
 
 
+
 class ThreeApp {
   static CAMERA_PARAM = {
     // fovy は Field of View Y のことで、縦方向の視野角を意味する
-    fovy: 60, //視野角
+    fovy: 70, //視野角
     // 描画する空間のアスペクト比（縦横比）
     aspect: window.innerWidth / window.innerHeight,
     // 描画する空間のニアクリップ面（最近面）
     near: 0.1,
     // 描画する空間のファークリップ面（最遠面）
-    far: 20.0,
+    // far: 20.0,
+    far: 60.0,
     // カメラの座標
     position: new THREE.Vector3(0.0, 2.0, 10.0),
     // カメラの注視点
@@ -48,10 +75,20 @@ class ThreeApp {
     intensity: 0.1,  // 光の強度
   };
 
+
+
+  x: number = 0.0;
+  vx: number = 0.0;
+  // friction: number = 0.95;  // 摩擦（0.95は少しスムーズな減速）
+  friction: number = 0.95;  // 摩擦（0.95は少しスムーズな減速）
+  // friction: number = 0.55;  // 摩擦（0.95は少しスムーズな減速）
+
   box;
+  boxArray
   geometry;
   arrowHelper;
   lighthelper;
+
 
 
   renderer;         // レンダラ
@@ -136,38 +173,112 @@ class ThreeApp {
     this.scene.add( this.lighthelper );
 
 
-    const dir = new THREE.Vector3( 1, 1, 0 );
-    dir.normalize();
-    const origin = new THREE.Vector3( 1, 1, 1 );
-    const length = 2;
-    const hex = 0xffff00;
-    this.arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
-    this.scene.add(this.arrowHelper);
-
-
-
 
   // // GridHelper
   // const gridHelper = new THREE.GridHelper(200, 10);
   // scene.add(gridHelper);
 
 
-    // オブジェクト
+    // // オブジェクト
     this.geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
     // this.material = new THREE.MeshBasicMaterial(ThreeApp.MATERIAL_PARAM);
     this.material = new THREE.MeshPhongMaterial(ThreeApp.MATERIAL_PARAM);
-    this.box = new THREE.Mesh(this.geometry, this.material);
-    this.scene.add(this.box);
+    // this.box = new THREE.Mesh(this.geometry, this.material);
+    // this.scene.add(this.box);
+
+
+    const Count = 100;
+    this.boxArray = [];
+    // const transformScale = 5.0;
+    const transformScale = 1.0;
+     for (let i = 0; i < Count; ++i) {
+      const box = new THREE.Mesh(this.geometry, this.material);
+      // box.position.z = (Math.random() * 2.0 - 1.0) * transformScale;
+      box.position.y = i * transformScale;
+      this.scene.add(box);
+      //   this.scene.add(torus);
+      this.boxArray.push(box);
+     }
+
+
+    // const torusCount = 100;
+    // const transformScale = 5.0;
+    // // this.torusGeometry = new THREE.TorusGeometry(0.5, 0.2, 8, 16);
+    // this.geometry = new THREE.BoxGeometry(1.0, 1.0, 1.0);
+    // this.torusArray = [];
+    // for (let i = 0; i < torusCount; ++i) {
+    //   // トーラスメッシュのインスタンスを生成
+    //   const torus = new THREE.Mesh(this.geometry, this.material);
+    //   // box = new THREE.Mesh(this.geometry, this.material);
+    //   // 座標をランダムに散らす
+    //   // torus.position.x = (Math.random() * 2.0 - 1.0) * transformScale;
+    //   // torus.position.y = (Math.random() * 2.0 - 1.0) * transformScale;
+    //   // torus.position.z = (Math.random() * 2.0 - 1.0) * transformScale;
+
+
+
+    //   torus.position.z = (Math.random() * 2.0 - 1.0) * transformScale;
+    //   // シーンに追加する
+    //   this.scene.add(torus);
+    //   // 配列に入れておく
+    //   this.torusArray.push(torus);
+    // }
 
   }
+
+
+
+  // render() {
+  //   requestAnimationFrame(this.render);
+
+  //   // コントロールを更新
+  //   this.controls.update();
+
+  //   this.renderer.render(this.scene, this.camera);
+  // }
+
 
   render() {
     requestAnimationFrame(this.render);
 
+    // マウスの動きに基づいて速度と位置を更新
+    const moveFactorX = 0.1; // 左右の動きの強さ（調整可能）
+
+    // 速度の更新（マウスの位置と現在の位置の差分に基づく）
+    // console.log(_mouseX);
+    // this.vx += (_mouseX - this.x) * moveFactorX;   // x軸の速度を計算
+    // this.vx *= this.friction;                      // 摩擦を適用して減速
+    // this.x += this.vx;                             // 位置を更新
+
+    // // 更新した位置をカメラやオブジェクトに適用
+    // this.box.position.x = this.x;
+
+
+
+    for (let i = 0; i < this.boxArray.length; i++) {
+      // console.log(this.boxArray[i]);
+      // console.log(_mouseX);
+      this.vx += (_mouseX - this.x) * moveFactorX;   // x軸の速度を計算
+      this.vx *= this.friction;                      // 摩擦を適用して減速
+      this.x += this.vx;
+      this.boxArray[i].position.x = this.x;
+      // this.boxArray[i].position.x = (Math.random() * 2.0 - 1.0) * this.x;
+      // this.boxArray[i].position.y = this.x;
+      // this.boxArray[i].position.z = (Math.random() * 2.0 - 1.0) * this.x;
+    }
+
+    // this.box.position.x = this.x;
+
+
+
+
+    // this.box.position.y = -_mouseY * 0.1 + 2.0; // Y軸はそのままマウスで調整
+    // this.box.lookAt(this.scene.position);       // 常にシーンの中心を見つめる
+
     // コントロールを更新
     this.controls.update();
 
-
+    // シーンをレンダリング
     this.renderer.render(this.scene, this.camera);
   }
 }
