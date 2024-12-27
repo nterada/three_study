@@ -299,6 +299,32 @@ class ThreeApp {
 
 
 
+    // for (let i = 0; i < 10; i++) {
+    //   const groupCopy = this.group.clone(); // groupを複製
+
+    //   // 各複製の位置を調整（y軸方向に5単位ずつずらす）
+    //   groupCopy.position.y = i * 5;  // 例えば、y軸方向に5単位ずつ配置
+
+    //   // 複製したgroupをシーンに追加
+    //   this.scene.add(groupCopy);
+
+    //   // 複製されたgroup内の各sphereにアニメーションを適用
+    //   for (let j = 0; j < groupCopy.children.length; j++) {
+    //     const child = groupCopy.children[j];
+    //     if (child instanceof THREE.Mesh && child.geometry instanceof THREE.SphereGeometry) {
+    //       // ここでアニメーション処理を適用
+    //       child.position.y = j * (Math.sin(this.clock.getElapsedTime() * 0.4) + 1) + 1;
+    //       child.rotation.x += 0.01;
+    //       child.rotation.y -= 0.01;
+    //       child.rotation.z -= 0.005;
+    //     }
+    //   }
+    // }
+
+
+
+
+
 
   }
 
@@ -339,6 +365,29 @@ class ThreeApp {
     // this.group.rotation.x += .01
     // this.group.rotation.y -= .008
     // this.group.rotation.z -= .005
+
+
+
+    // this.scene.children.forEach(group => {
+    //   if (group instanceof THREE.Group) {
+    //     // group内の各sphereをアニメーション
+    //     group.children.forEach(child => {
+    //       if (child instanceof THREE.Mesh && child.geometry instanceof THREE.SphereGeometry) {
+    //         child.position.y = 1 * (Math.sin(time * 0.4) + 1) + 1;
+    //         child.rotation.x += 0.01;
+    //         child.rotation.y -= 0.01;
+    //         child.rotation.z -= 0.005;
+    //       }
+    //     });
+    //   }
+    // });
+
+
+
+
+
+
+
 
 
     // コントロールを更新
