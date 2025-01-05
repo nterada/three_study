@@ -91,6 +91,10 @@ class ThreeApp {
   raycaster;        // レイキャスター @@@
   mouse;            // マウスベクトル @@@
 
+  mixer;
+  actions;
+  clock;
+
   /**
    * コンストラクタ
    * @constructor
@@ -167,16 +171,7 @@ class ThreeApp {
     // グループを作成 @@@
     this.objectGroup = new THREE.Group();
 
-    // - glTF はシーンを含むデータ構造 ----------------------------------------
-    // glTF にはシーン全体の情報を含めることができる仕様になっており three.js も
-    // それにならって読み込み後に返されるオブジェクトは scene というプロパティを
-    // 持った状態になっています。
-    // scene プロパティは要するに Object3D で、その子要素にメッシュなどのデータ
-    // が含まれます。glTF をシーンに追加する場合は scene プロパティ以下をシーン
-    // に追加するよう気をつけましょう。
-    // ※その他、glTF にはカメラやアニメーションの情報を含ませることもできます
-    // ------------------------------------------------------------------------
-    // シーンに glTF を追加 @@@
+    // 元の glTF オブジェクトをシーンに追加 @@@
     const numObjects = 8; // 複製するオブジェクトの数
     const radius = 5; // 円の半径
     for (let i = 0; i < numObjects; i++) {
@@ -192,6 +187,13 @@ class ThreeApp {
         }
       });
 
+      // アニメーションミキサーを設定 @@@
+      const mixer = new THREE.AnimationMixer(clone);
+      this.gltf.animations.forEach((clip) => {
+        const action = mixer.clipAction(clip);
+        action.play();
+      });
+
       this.objectGroup.add(clone);
     }
 
@@ -203,6 +205,9 @@ class ThreeApp {
     this.axesHelper = new THREE.AxesHelper(axesBarLength);
     this.scene.add(this.axesHelper);
 
+    // アニメーション時間管理のための Clock オブジェクトを生成しておく @@@
+    this.clock = new THREE.Clock();
+
     // コントロール
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
   }
@@ -212,13 +217,37 @@ class ThreeApp {
    */
   load(): Promise<void> {
     return new Promise<void>((resolve) => {
-      // 読み込むファイルのパス @@@
-      // const gltfPath = 'assets/data/Duck.glb';
+      // 読み込むファイルのパス
       const gltfPath = 'assets/data/anime4.glb';
       const loader = new GLTFLoader();
       loader.load(gltfPath, (gltf) => {
-        // あとで使えるようにプロパティに代入しておく
+        // glTF のロードが終わったらアニメーション関連の初期化を同時に行う @@@
         this.gltf = gltf;
+        // ミキサーを生成する（scene プロパティを渡す点に注意）
+        this.mixer = new THREE.AnimationMixer(this.gltf.scene);
+        // アニメーション情報を取り出す
+        const animations = this.gltf.animations;
+        if (animations.length === 0) {
+          console.error('No animations found in the glTF file.');
+          resolve();
+          return;
+        }
+        // 取り出したアニメーション情報を順番にミキサーに通してアクション化する
+        this.actions = [];
+        for(let i = 0; i < animations.length; ++i){
+          // アクションを生成
+          const action = this.mixer.clipAction(animations[i]);
+          // ループ方式を設定する
+          action.setLoop(THREE.LoopRepeat);
+          // 再生状態にする
+          action.play();
+          // アクションを配列に追加
+          this.actions.push(action);
+        }
+
+        // 最初のアクションのウェイトだけ 1.0 にして目に見えるようにしておく
+        this.actions[1].weight = 1.0;
+
         resolve();
       });
     });
@@ -255,6 +284,12 @@ class ThreeApp {
     // グループを回転させる @@@
     if (this.objectGroup) {
       this.objectGroup.rotation.y -= 0.001; // Y軸回転
+    }
+
+    // 前回からの経過時間（デルタ）を取得してミキサーに適用する @@@
+    const delta = this.clock.getDelta();
+    if (this.mixer) {
+      this.mixer.update(delta);
     }
 
     // コントロールを更新
