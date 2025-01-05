@@ -20,7 +20,7 @@ import { GLTFLoader } from '../lib/GLTFLoader.js'; // glTF のローダーを追
 window.addEventListener('DOMContentLoaded', async () => {
   const wrapper = document.querySelector('#webgl');
   const app = new ThreeApp(wrapper);
-  await app.load();
+  await app.loadModels(); // loadModels に変更 @@@
   app.init();
   app.render();
 }, false);
@@ -166,92 +166,85 @@ class ThreeApp {
     this.raycaster = new THREE.Raycaster();
     this.mouse = new THREE.Vector2();
 
-    // マウスクリックイベントを追加 @@@
-    this.renderer.domElement.addEventListener('click', this.onMouseClick.bind(this), false);
+    // マウスムーブイベントを追加 @@@
+    this.renderer.domElement.addEventListener('mousemove', this.onMouseMove.bind(this), false);
 
     // グループを作成 @@@
     this.objectGroup = new THREE.Group();
-
-    // 元の glTF オブジェクトをシーンに追加 @@@
-    const numObjects = 8; // 複製するオブジェクトの数
-    const radius = 5; // 円の半径
-    for (let i = 0; i < numObjects; i++) {
-      const clone = this.gltf.scene.clone();
-      const angle = (i / numObjects) * Math.PI * 2;
-      clone.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-      clone.scale.set(0.2, 0.2, 0.2);
-
-      // マテリアルを複製 @@@
-      clone.traverse((child) => {
-        if (child.isMesh) {
-          child.material = child.material.clone();
-        }
-      });
-
-      // アニメーションミキサーを設定 @@@
-      const mixer = new THREE.AnimationMixer(clone);
-      this.gltf.animations.forEach((clip) => {
-        const action = mixer.clipAction(clip);
-        action.play();
-      });
-
-      this.objectGroup.add(clone);
-    }
-
-    // グループをシーンに追加 @@@
-    this.scene.add(this.objectGroup);
-
-    // 軸ヘルパー
-    const axesBarLength = 5.0;
-    this.axesHelper = new THREE.AxesHelper(axesBarLength);
-    this.scene.add(this.axesHelper);
 
     // アニメーション時間管理のための Clock オブジェクトを生成しておく @@@
     this.clock = new THREE.Clock();
 
     // コントロール
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+
+    // 3Dオブジェクトを読み込み、円状に配置 @@@
+    this.loadModels().then((models) => {
+      const numObjects = models.length; // 読み込んだオブジェクトの数
+      const radius = 5; // 円の半径
+      for (let i = 0; i < numObjects; i++) {
+        const model = models[i].scene;
+        const mixer = models[i].mixer;
+        const angle = (i / numObjects) * Math.PI * 2;
+        model.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+        model.scale.set(0.2, 0.2, 0.2);
+        model.userData.mixer = mixer; // モデルにミキサーを設定
+        this.objectGroup.add(model);
+      }
+
+      // グループをシーンに追加 @@@
+      this.scene.add(this.objectGroup);
+    });
   }
 
   /**
-   * アセット（素材）のロードを行う Promise
+   * 複数の glTF モデルを読み込む
+   * @returns {Promise<{scene: THREE.Group, mixer: THREE.AnimationMixer}[]>}
    */
-  load(): Promise<void> {
-    return new Promise<void>((resolve) => {
-      // 読み込むファイルのパス
-      const gltfPath = 'assets/data/dogu3.glb';
-      const loader = new GLTFLoader();
-      loader.load(gltfPath, (gltf) => {
-        // glTF のロードが終わったらアニメーション関連の初期化を同時に行う @@@
-        this.gltf = gltf;
-        // ミキサーを生成する（scene プロパティを渡す点に注意）
-        this.mixer = new THREE.AnimationMixer(this.gltf.scene);
-        // アニメーション情報を取り出す
-        const animations = this.gltf.animations;
-        if (animations.length === 0) {
-          console.error('No animations found in the glTF file.');
-          resolve();
-          return;
-        }
-        // 取り出したアニメーション情報を順番にミキサーに通してアクション化する
-        this.actions = [];
-        for(let i = 0; i < animations.length; ++i){
-          // アクションを生成
-          const action = this.mixer.clipAction(animations[i]);
-          // ループ方式を設定する
-          action.setLoop(THREE.LoopRepeat);
-          // 再生状態にする
-          action.play();
-          // アクションを配列に追加
-          this.actions.push(action);
-        }
-
-        // 最初のアクションのウェイトだけ 1.0 にして目に見えるようにしておく
-        this.actions[0].weight = 1.0;
-
-        resolve();
+  loadModels(): Promise<{scene: THREE.Group, mixer: THREE.AnimationMixer}[]> {
+    const modelPaths = [
+      'assets/data/dogu_dammy1.glb',
+      'assets/data/dogu_dammy2.glb',
+      'assets/data/dogu_dammy3.glb',
+    ];
+    const loader = new GLTFLoader();
+    const promises = modelPaths.map((path) => {
+      return new Promise<{scene: THREE.Group, mixer: THREE.AnimationMixer}>((resolve, reject) => {
+        loader.load(path, (gltf) => {
+          const mixer = new THREE.AnimationMixer(gltf.scene);
+          gltf.animations.forEach((clip) => {
+            mixer.clipAction(clip).play();
+          });
+          resolve({scene: gltf.scene, mixer: mixer});
+        }, undefined, reject);
       });
     });
+    return Promise.all(promises);
+  }
+
+  /**
+   * マウスムーブイベントハンドラ
+   * @param {MouseEvent} event
+   */
+  onMouseMove(event) {
+    // マウス座標を正規化
+    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    // レイキャストを設定
+    this.raycaster.setFromCamera(this.mouse, this.camera);
+
+    // 交差するオブジェクトを取得
+    const intersects = this.raycaster.intersectObjects(this.objectGroup.children, true);
+
+    // 最初に交差したオブジェクトのアニメーションを再生
+    if (intersects.length > 0) {
+      const intersectedObject = intersects[0].object;
+      const mixer = intersectedObject.userData.mixer;
+      if (mixer) {
+        mixer.update(this.clock.getDelta());
+      }
+    }
   }
 
   /**
@@ -289,9 +282,11 @@ class ThreeApp {
 
     // 前回からの経過時間（デルタ）を取得してミキサーに適用する @@@
     const delta = this.clock.getDelta();
-    if (this.mixer) {
-      this.mixer.update(delta);
-    }
+    this.objectGroup.children.forEach((child) => {
+      if (child.userData.mixer) {
+        child.userData.mixer.update(delta);
+      }
+    });
 
     // コントロールを更新
     this.controls.update();
