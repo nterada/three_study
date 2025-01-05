@@ -52,7 +52,7 @@ class ThreeApp {
     color: 0xffffff,
     // color: 0xff00ff,
     // intensity: 1.0,
-    intensity: 4.0,
+    intensity: 1.0,
     position: new THREE.Vector3(1.0, 1.0, 1.0),
   };
   /**
@@ -61,7 +61,8 @@ class ThreeApp {
   static AMBIENT_LIGHT_PARAM = {
     color: 0xffffff,
     // color: 0xffff00,
-    intensity: 0.1,
+    // intensity: 0.1,
+    intensity: 0.8,
   };
   /**
    * マテリアル定義のための定数
@@ -218,7 +219,7 @@ class ThreeApp {
   load(): Promise<void> {
     return new Promise<void>((resolve) => {
       // 読み込むファイルのパス
-      const gltfPath = 'assets/data/anime4.glb';
+      const gltfPath = 'assets/data/dogu3.glb';
       const loader = new GLTFLoader();
       loader.load(gltfPath, (gltf) => {
         // glTF のロードが終わったらアニメーション関連の初期化を同時に行う @@@
@@ -246,7 +247,7 @@ class ThreeApp {
         }
 
         // 最初のアクションのウェイトだけ 1.0 にして目に見えるようにしておく
-        this.actions[1].weight = 1.0;
+        this.actions[0].weight = 1.0;
 
         resolve();
       });
