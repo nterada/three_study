@@ -95,6 +95,7 @@ class ThreeApp {
   mixer;
   actions;
   clock;
+  hoveredObject;    // ホバーしているオブジェクトを追跡するための変数 @@@
 
   /**
    * コンストラクタ
@@ -178,6 +179,9 @@ class ThreeApp {
     // コントロール
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
 
+    // ホバーしているオブジェクトを追跡するための変数 @@@
+    this.hoveredObject = null;
+
     // 3Dオブジェクトを読み込み、円状に配置 @@@
     this.loadModels().then((models) => {
       const numObjects = models.length; // 読み込んだオブジェクトの数
@@ -188,6 +192,7 @@ class ThreeApp {
         const angle = (i / numObjects) * Math.PI * 2;
         model.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
         model.scale.set(0.2, 0.2, 0.2);
+        model.rotation.y = angle + Math.PI / -6; // +30度回転させる @@@
         model.userData.mixer = mixer; // モデルにミキサーを設定
         this.objectGroup.add(model);
       }
@@ -237,13 +242,11 @@ class ThreeApp {
     // 交差するオブジェクトを取得
     const intersects = this.raycaster.intersectObjects(this.objectGroup.children, true);
 
-    // 最初に交差したオブジェクトのアニメーションを再生
+    // 最初に交差したオブジェクトを追跡
     if (intersects.length > 0) {
-      const intersectedObject = intersects[0].object;
-      const mixer = intersectedObject.userData.mixer;
-      if (mixer) {
-        mixer.update(this.clock.getDelta());
-      }
+      this.hoveredObject = intersects[0].object.parent; // 親の Group を取得
+    } else {
+      this.hoveredObject = null;
     }
   }
 
@@ -282,11 +285,9 @@ class ThreeApp {
 
     // 前回からの経過時間（デルタ）を取得してミキサーに適用する @@@
     const delta = this.clock.getDelta();
-    this.objectGroup.children.forEach((child) => {
-      if (child.userData.mixer) {
-        child.userData.mixer.update(delta);
-      }
-    });
+    if (this.hoveredObject && this.hoveredObject.userData.mixer) {
+      this.hoveredObject.userData.mixer.update(delta);
+    }
 
     // コントロールを更新
     this.controls.update();
