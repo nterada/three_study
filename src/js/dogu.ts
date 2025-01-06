@@ -21,6 +21,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const wrapper = document.querySelector('#webgl');
   const app = new ThreeApp(wrapper);
   await app.loadModels(); // loadModels に変更 @@@
+  await app.loadBaseModel(); // loadModels に変更 @@@
   app.init();
   app.render();
   const canvas = app.renderer.domElement;
@@ -45,7 +46,8 @@ class ThreeApp {
    * レンダラー定義のための定数
    */
   static RENDERER_PARAM = {
-    clearColor: 0xffffff,
+    // clearColor: 0xfcfce2,
+    clearColor: 0xc9b9a8,
     width: window.innerWidth - 400, // 400px 引いた幅に設定
     height: window.innerHeight,
   };
@@ -66,8 +68,23 @@ class ThreeApp {
     color: 0xffffff,
     // color: 0xffff00,
     // intensity: 0.1,
-    intensity: 0.8,
+    intensity: 0.3,
   };
+
+
+
+  static SPOT_LIGHT_PARAM = {
+    color: 0xF067A6,
+    intensity: 1,
+    distance: 10,
+    angle: Math.PI / 4,
+    penumbra: 0.1,
+    decay: 1,
+    position: new THREE.Vector3(0, 10, 0), // 中央の真上に設定
+    targetPosition: new THREE.Vector3(0, 0, 0), // 中央を照らすように設定
+  };
+
+
   /**
    * マテリアル定義のための定数
    */
@@ -100,6 +117,10 @@ class ThreeApp {
   actions;
   clock;
   hoveredObject;    // ホバーしているオブジェクトを追跡するための変数 @@@
+  spotLight;
+  spotLightHelper;
+  baseModel;
+  texture;
 
   /**
    * コンストラクタ
@@ -136,11 +157,11 @@ class ThreeApp {
     this.scene = new THREE.Scene();
 
     // フォグ
-    this.scene.fog = new THREE.Fog(
-      ThreeApp.FOG_PARAM.color,
-      ThreeApp.FOG_PARAM.near,
-      ThreeApp.FOG_PARAM.far
-    );
+    // this.scene.fog = new THREE.Fog(
+    //   ThreeApp.FOG_PARAM.color,
+    //   ThreeApp.FOG_PARAM.near,
+    //   ThreeApp.FOG_PARAM.far
+    // );
 
     // カメラ
     this.camera = new THREE.PerspectiveCamera(
@@ -160,12 +181,44 @@ class ThreeApp {
     this.directionalLight.position.copy(ThreeApp.DIRECTIONAL_LIGHT_PARAM.position);
     this.scene.add(this.directionalLight);
 
+
+
     // アンビエントライト（環境光）
     this.ambientLight = new THREE.AmbientLight(
       ThreeApp.AMBIENT_LIGHT_PARAM.color,
       ThreeApp.AMBIENT_LIGHT_PARAM.intensity,
     );
     this.scene.add(this.ambientLight);
+
+
+    // // スポットライトを追加
+    // this.spotLight = new THREE.SpotLight(
+    //   ThreeApp.SPOT_LIGHT_PARAM.color,
+    //   ThreeApp.SPOT_LIGHT_PARAM.intensity,
+    //   ThreeApp.SPOT_LIGHT_PARAM.distance,
+    //   // ThreeApp.SPOT_LIGHT_PARAM.angle,
+    //   // ThreeApp.SPOT_LIGHT_PARAM.penumbra,
+    //   ThreeApp.SPOT_LIGHT_PARAM.decay
+    // );
+    // this.spotLight.position.copy(ThreeApp.SPOT_LIGHT_PARAM.position);
+    // this.spotLight.target.position.copy(ThreeApp.SPOT_LIGHT_PARAM.targetPosition);
+    // this.scene.add(this.spotLight);
+    // this.scene.add(this.spotLight.target); // ターゲットをシーンに追加
+
+    // // スポットライトヘルパーを追加
+    // this.spotLightHelper = new THREE.SpotLightHelper(this.spotLight);
+    // this.scene.add(this.spotLightHelper);
+
+
+  // 仮の地面を追加
+
+
+  // const planeGeometry = new THREE.PlaneGeometry(20, 20);
+  // const planeMaterial = new THREE.MeshPhongMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+  // const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+  // plane.rotation.x = -Math.PI / 2; // 地面を水平に設定
+  // this.scene.add(plane);
+
 
     // レイキャスターとマウスベクトルを初期化 @@@
     this.raycaster = new THREE.Raycaster();
@@ -187,24 +240,63 @@ class ThreeApp {
     // ホバーしているオブジェクトを追跡するための変数 @@@
     this.hoveredObject = null;
 
+    // 土台モデルを読み込んで表示
+    this.loadBaseModel().then((model) => {
+      this.baseModel = model.scene;
+      this.baseModel.position.set(0, 0, 0); // 土台モデルの位置を設定
+      this.scene.add(this.baseModel);
+
+    });
+
     // 3Dオブジェクトを読み込み、円状に配置 @@@
     this.loadModels().then((models) => {
       const numObjects = models.length; // 読み込んだオブジェクトの数
-      const radius = 5; // 円の半径
+      const radius = 3; // 円の半径
       for (let i = 0; i < numObjects; i++) {
         const model = models[i].scene;
         const mixer = models[i].mixer;
         const angle = (i / numObjects) * Math.PI * 2;
         model.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
         model.scale.set(0.2, 0.2, 0.2);
-        model.rotation.y = angle + Math.PI / -6; // +30度回転させる @@@
+        // model.rotation.y = angle + Math.PI / -6; // +30度回転させる @@@
         model.userData.mixer = mixer; // モデルにミキサーを設定
+
+
+
+    // モデルごとの位置を微調整
+    switch (i) {
+      case 0:
+        model.position.y += .2; // 例: モデル0のx座標を0.5増加
+        // model.rotation.y += .2; // 例: モデル0のx座標を0.5増加
+        model.rotation.y =  angle + Math.PI / -1;  // +30度回転させる @@@
+        model.rotation.y = angle + Math.PI / -6; // +30度回転させる @@@
+        // model.position.y += 0.2; // 例: モデル0のy座標を0.2増加
+        break;
+        case 1:
+          model.position.z -= 0.3; // 例: モデル1のx座標を0.3減少
+          // model.position.z += 0.4; // 例: モデル1のz座標を0.4増加
+          model.rotation.y = angle + Math.PI / 6; // +30度回転させる @@@
+          break;
+          case 2:
+            model.position.z -= 0.1; // 例: モデル2のy座標を0.1減少
+            model.rotation.y = angle + Math.PI / -6; // +30度回転させる @@@
+        // model.position.y -= 0.1; // 例: モデル2のy座標を0.1減少
+        // model.position.z -= 0.2; // 例: モデル2のz座標を0.2減少
+        break;
+      // 他のモデルも同様に微調整
+    }
+
+
+
         this.objectGroup.add(model);
       }
 
       // グループをシーンに追加 @@@
       this.scene.add(this.objectGroup);
     });
+
+
+
   }
 
   /**
@@ -214,8 +306,8 @@ class ThreeApp {
   loadModels(): Promise<{scene: THREE.Group, mixer: THREE.AnimationMixer}[]> {
     const modelPaths = [
       'assets/data/dogu_dammy1.glb',
-      'assets/data/dogu_dammy2.glb',
-      'assets/data/dogu_dammy3.glb',
+      'assets/data/hart-3.glb',
+      'assets/data/dogu_dammy1.glb',
     ];
     const loader = new GLTFLoader();
     const promises = modelPaths.map((path) => {
@@ -231,6 +323,41 @@ class ThreeApp {
     });
     return Promise.all(promises);
   }
+
+
+    /**
+   * 土台の glTF モデルを読み込む
+   * @returns {Promise<{scene: THREE.Group, mixer: THREE.AnimationMixer}>}
+   */
+    loadBaseModel(): Promise<{scene: THREE.Group, mixer: THREE.AnimationMixer}> {
+      const baseModelPath = 'assets/data/dodai-5.glb';
+      const loader = new GLTFLoader();
+      return new Promise<{scene: THREE.Group, mixer: THREE.AnimationMixer}>((resolve, reject) => {
+        loader.load(baseModelPath, (gltf) => {
+          const mixer = new THREE.AnimationMixer(gltf.scene);
+          gltf.animations.forEach((clip) => {
+            mixer.clipAction(clip).play();
+          });
+          resolve({scene: gltf.scene, mixer: mixer});
+        }, undefined, reject);
+      });
+    }
+
+
+
+      /**
+   * ポイントスプライト用
+   */
+  // load() {
+  //   return new Promise((resolve) => {
+  //     const imagePath = './star.png';
+  //     const loader = new THREE.TextureLoader();
+  //     loader.load(imagePath, (texture) => {
+  //       this.texture = texture;
+  //       resolve();
+  //     });
+  //   });
+  // }
 
   /**
    * マウスムーブイベントハンドラ
@@ -254,6 +381,18 @@ class ThreeApp {
     } else {
       this.hoveredObject = null;
     }
+
+
+    const mouseVector = new THREE.Vector3(this.mouse.x, this.mouse.y, 0.5).unproject(this.camera);
+  // オブジェクトのバウンディングボックスを拡大してヒットエリアを設定
+  this.objectGroup.children.forEach((child) => {
+    const box = new THREE.Box3().setFromObject(child);
+    const expandedBox = box.clone().expandByScalar(50 * (box.max.x - box.min.x) / (window.innerWidth - 400));
+
+    if (expandedBox.containsPoint(mouseVector)) {
+      this.hoveredObject = child;
+    }
+  });
   }
 
   /**
@@ -307,16 +446,21 @@ class ThreeApp {
     // 恒常ループ
     requestAnimationFrame(this.render);
 
-    // グループを回転させる @@@
-    if (this.objectGroup) {
-      this.objectGroup.rotation.y -= 0.001; // Y軸回転
-    }
+    // // グループを回転させる @@@
+    // if (this.objectGroup) {
+    //   this.objectGroup.rotation.y -= 0.001; // Y軸回転
+    // }
 
-    // 前回からの経過時間（デルタ）を取得してミキサーに適用する @@@
-    const delta = this.clock.getDelta();
-    if (this.hoveredObject && this.hoveredObject.userData.mixer) {
-      this.hoveredObject.userData.mixer.update(delta);
-    }
+    // // グループを回転させる @@@
+    // if (this.baseModel) {
+    //   this.baseModel.rotation.y -= 0.001; // Y軸回転
+    // }
+
+    // // 前回からの経過時間（デルタ）を取得してミキサーに適用する @@@
+    // const delta = this.clock.getDelta();
+    // if (this.hoveredObject && this.hoveredObject.userData.mixer) {
+    //   this.hoveredObject.userData.mixer.update(delta);
+    // }
 
     // コントロールを更新
     this.controls.update();
