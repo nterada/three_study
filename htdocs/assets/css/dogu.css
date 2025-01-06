@@ -12,4 +12,29 @@ canvas {
   box-sizing: border-box;
 }
 
-/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2h0ZG9jcy9hc3NldHMvY3NzL2RvZ3UuY3NzIiwibWFwcGluZ3MiOiI7OztBQUFBO0VBQ0U7QUFDRjs7QUFFQTtFQUNFO0VBQUE7RUFDQTtFQUFBO0FBQ0YsQyIsInNvdXJjZXMiOlsid2VicGFjazovLy8uL3NyYy9jc3MvZG9ndS5zY3NzIl0sIm5hbWVzIjpbXSwic291cmNlUm9vdCI6IiJ9*/
+.modal {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 400px;
+  height: 600px;
+  z-index: 1;
+}
+.modal ul {
+  list-style: none;
+}
+.modal ul li {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+}
+.modal ul li._show {
+  opacity: 1;
+  color: pink;
+}
+.modal ul li p {
+  text-align: justify;
+}
+
+/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiL2h0ZG9jcy9hc3NldHMvY3NzL2RvZ3UuY3NzIiwibWFwcGluZ3MiOiI7OztBQUFBO0VBQ0U7QUFDRjs7QUFFQTtFQUNFO0VBQUE7RUFDQTtFQUFBO0FBQ0Y7O0FBTUE7RUFDRTtFQUNBO0VBQ0E7RUFDQTtFQUNBO0VBSUE7QUFORjtBQVFFO0VBQ0U7QUFOSjtBQU9JO0VBQ0U7RUFDQTtFQUNBO0VBQ0E7QUFMTjtBQU9NO0VBQ0U7RUFDQTtBQUxSO0FBT007RUFDRTtBQUxSLEMiLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly8vLi9zcmMvY3NzL2RvZ3Uuc2NzcyJdLCJuYW1lcyI6W10sInNvdXJjZVJvb3QiOiIifQ==*/

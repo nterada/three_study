@@ -23,6 +23,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   await app.loadModels(); // loadModels に変更 @@@
   app.init();
   app.render();
+  const canvas = app.renderer.domElement;
+  canvas.style.width = `${window.innerWidth - 400}px`;
+  canvas.style.height = `${window.innerHeight}px`;
 }, false);
 
 class ThreeApp {
@@ -31,7 +34,8 @@ class ThreeApp {
    */
   static CAMERA_PARAM = {
     fovy: 60,
-    aspect: window.innerWidth / window.innerHeight,
+    // aspect: window.innerWidth / window.innerHeight,
+    aspect: (window.innerWidth - 400) / window.innerHeight, // 400px 引いた幅に基づいて計算
     near: 0.1,
     far: 50.0,
     position: new THREE.Vector3(0.0, 2.0, 10.0),
@@ -42,7 +46,7 @@ class ThreeApp {
    */
   static RENDERER_PARAM = {
     clearColor: 0xffffff,
-    width: window.innerWidth,
+    width: window.innerWidth - 400, // 400px 引いた幅に設定
     height: window.innerHeight,
   };
   /**
@@ -169,6 +173,7 @@ class ThreeApp {
 
     // マウスムーブイベントを追加 @@@
     this.renderer.domElement.addEventListener('mousemove', this.onMouseMove.bind(this), false);
+    this.renderer.domElement.addEventListener('click', this.onMouseClick.bind(this), false); // クリックイベントを追加
 
     // グループを作成 @@@
     this.objectGroup = new THREE.Group();
@@ -233,7 +238,8 @@ class ThreeApp {
    */
   onMouseMove(event) {
     // マウス座標を正規化
-    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    // this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.x = (event.clientX / (window.innerWidth - 400)) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     // レイキャストを設定
@@ -254,9 +260,12 @@ class ThreeApp {
    * マウスクリックイベントハンドラ
    * @param {MouseEvent} event
    */
+
   onMouseClick(event) {
+    // console.log('クリックイベント発火'); // デバッグ用ログ
+
     // マウス座標を正規化
-    this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    this.mouse.x = (event.clientX / (window.innerWidth - 400)) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     // レイキャストを設定
@@ -268,8 +277,28 @@ class ThreeApp {
     // 最初に交差したオブジェクトの色を変更
     if (intersects.length > 0) {
       intersects[0].object.material.color.set(0x00ff00); // 緑色に変更
+      // console.log('クリックされました');
+
+      // すべての modalListItem から ._show クラスを削除
+      const modalListItems = document.querySelectorAll('.modalListItem');
+      modalListItems.forEach(item => item.classList.remove('_show'));
+
+      // 交差したオブジェクトに対応する modalListItem に ._show クラスを付与
+      const intersectedObject = intersects[0].object.parent || intersects[0].object;
+      const index = this.objectGroup.children.indexOf(intersectedObject);
+      // console.log('交差したオブジェクト:', intersectedObject); // デバッグ用ログ
+      // console.log('交差したオブジェクトのインデックス:', index); // デバッグ用ログ
+      if (index !== -1 && modalListItems[index]) {
+        // console.log('対応する modalListItem:', modalListItems[index]); // デバッグ用ログ
+        modalListItems[index].classList.add('_show');
+      } else {
+        console.log('対応する modalListItem が見つかりません'); // デバッグ用ログ
+      }
+    } else {
+      console.log('交差するオブジェクトが見つかりません'); // デバッグ用ログ
     }
   }
+
 
   /**
    * 描画処理

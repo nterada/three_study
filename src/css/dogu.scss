@@ -9,3 +9,34 @@ canvas {
   // height: 50%;
 }
 
+
+
+.modal {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 400px;
+  height: 600px;
+  // height: 100vh;
+  // border: 1px solid orange;
+  // background: #ddd;
+  z-index: 1;
+
+  ul {
+    list-style: none;
+    li {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+
+      &._show {
+        opacity: 1;
+        color: pink;
+      }
+      p {
+        text-align: justify;
+      }
+    }
+  }
+}
