@@ -115,8 +115,8 @@ class ThreeApp {
 
     // ウィンドウのリサイズを検出できるようにする
     window.addEventListener('resize', () => {
-      this.renderer.setSize(window.innerWidth, window.innerHeight);
-      this.camera.aspect = window.innerWidth / window.innerHeight;
+      this.renderer.setSize((window.innerWidth - 400), window.innerHeight);
+      this.camera.aspect = (window.innerWidth - 400) / window.innerHeight;
       this.camera.updateProjectionMatrix();
     }, false);
   }
@@ -262,7 +262,7 @@ class ThreeApp {
    */
 
   onMouseClick(event) {
-    // console.log('クリックイベント発火'); // デバッグ用ログ
+    console.log('クリックイベント発火'); // デバッグ用ログ
 
     // マウス座標を正規化
     this.mouse.x = (event.clientX / (window.innerWidth - 400)) * 2 - 1;
@@ -274,22 +274,22 @@ class ThreeApp {
     // 交差するオブジェクトを取得
     const intersects = this.raycaster.intersectObjects(this.objectGroup.children, true);
 
+    // すべての modalListItem から ._show クラスを削除
+    const modalListItems = document.querySelectorAll('.modalListItem');
+    modalListItems.forEach(item => item.classList.remove('_show'));
+
     // 最初に交差したオブジェクトの色を変更
     if (intersects.length > 0) {
       intersects[0].object.material.color.set(0x00ff00); // 緑色に変更
-      // console.log('クリックされました');
-
-      // すべての modalListItem から ._show クラスを削除
-      const modalListItems = document.querySelectorAll('.modalListItem');
-      modalListItems.forEach(item => item.classList.remove('_show'));
+      console.log('クリックされました');
 
       // 交差したオブジェクトに対応する modalListItem に ._show クラスを付与
       const intersectedObject = intersects[0].object.parent || intersects[0].object;
       const index = this.objectGroup.children.indexOf(intersectedObject);
-      // console.log('交差したオブジェクト:', intersectedObject); // デバッグ用ログ
-      // console.log('交差したオブジェクトのインデックス:', index); // デバッグ用ログ
+      console.log('交差したオブジェクト:', intersectedObject); // デバッグ用ログ
+      console.log('交差したオブジェクトのインデックス:', index); // デバッグ用ログ
       if (index !== -1 && modalListItems[index]) {
-        // console.log('対応する modalListItem:', modalListItems[index]); // デバッグ用ログ
+        console.log('対応する modalListItem:', modalListItems[index]); // デバッグ用ログ
         modalListItems[index].classList.add('_show');
       } else {
         console.log('対応する modalListItem が見つかりません'); // デバッグ用ログ
