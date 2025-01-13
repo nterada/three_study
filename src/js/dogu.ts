@@ -34,7 +34,8 @@ class ThreeApp {
    * カメラ定義のための定数
    */
   static CAMERA_PARAM = {
-    fovy: 60,
+    // fovy: 60,
+    fovy: 40,
     // aspect: window.innerWidth / window.innerHeight,
     aspect: (window.innerWidth - 400) / window.innerHeight, // 400px 引いた幅に基づいて計算
     near: 0.1,
@@ -68,7 +69,7 @@ class ThreeApp {
     color: 0xffffff,
     // color: 0xffff00,
     // intensity: 0.1,
-    intensity: 0.3,
+    intensity: 0.8,
   };
 
 
@@ -273,12 +274,13 @@ class ThreeApp {
         // model.position.y += 0.2; // 例: モデル0のy座標を0.2増加
         break;
         case 1:
-          model.position.z -= 0.3; // 例: モデル1のx座標を0.3減少
+          // model.position.z -= 0; // 例: モデル1のx座標を0.3減少
+          model.position.y -= -0.25;
           // model.position.z += 0.4; // 例: モデル1のz座標を0.4増加
           model.rotation.y = angle + Math.PI / 6; // +30度回転させる @@@
           break;
           case 2:
-            model.position.z -= 0.1; // 例: モデル2のy座標を0.1減少
+            model.position.y -= 0.25; // 例: モデル2のy座標を0.1減少
             model.rotation.y = angle + Math.PI / -6; // +30度回転させる @@@
         // model.position.y -= 0.1; // 例: モデル2のy座標を0.1減少
         // model.position.z -= 0.2; // 例: モデル2のz座標を0.2減少
@@ -307,7 +309,14 @@ class ThreeApp {
     const modelPaths = [
       'assets/data/dogu_dammy1.glb',
       'assets/data/hart-3.glb',
+      'assets/data/doguneko-3.glb',
+      'assets/data/hart-4.glb',
+      'assets/data/doguneko-3.glb',
+      'assets/data/hart-5.glb',
       'assets/data/dogu_dammy1.glb',
+      'assets/data/hart-6.glb',
+      'assets/data/dogu_dammy1.glb',
+      'assets/data/hart-6.glb',
     ];
     const loader = new GLTFLoader();
     const promises = modelPaths.map((path) => {
@@ -446,21 +455,21 @@ class ThreeApp {
     // 恒常ループ
     requestAnimationFrame(this.render);
 
-    // // グループを回転させる @@@
-    // if (this.objectGroup) {
-    //   this.objectGroup.rotation.y -= 0.001; // Y軸回転
-    // }
+    // グループを回転させる @@@
+    if (this.objectGroup) {
+      this.objectGroup.rotation.y -= 0.001; // Y軸回転
+    }
 
-    // // グループを回転させる @@@
-    // if (this.baseModel) {
-    //   this.baseModel.rotation.y -= 0.001; // Y軸回転
-    // }
+    // グループを回転させる @@@
+    if (this.baseModel) {
+      this.baseModel.rotation.y -= 0.001; // Y軸回転
+    }
 
-    // // 前回からの経過時間（デルタ）を取得してミキサーに適用する @@@
-    // const delta = this.clock.getDelta();
-    // if (this.hoveredObject && this.hoveredObject.userData.mixer) {
-    //   this.hoveredObject.userData.mixer.update(delta);
-    // }
+    // 前回からの経過時間（デルタ）を取得してミキサーに適用する @@@
+    const delta = this.clock.getDelta();
+    if (this.hoveredObject && this.hoveredObject.userData.mixer) {
+      this.hoveredObject.userData.mixer.update(delta);
+    }
 
     // コントロールを更新
     this.controls.update();
