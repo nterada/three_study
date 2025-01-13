@@ -22,6 +22,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   const app = new ThreeApp(wrapper);
   await app.loadModels(); // loadModels に変更 @@@
   await app.loadBaseModel(); // loadModels に変更 @@@
+  await app.load(); // ポイントスプライトの読み込み
   app.init();
   app.render();
   const canvas = app.renderer.domElement;
@@ -122,6 +123,7 @@ class ThreeApp {
   spotLightHelper;
   baseModel;
   texture;
+  points;
 
   /**
    * コンストラクタ
@@ -190,6 +192,60 @@ class ThreeApp {
       ThreeApp.AMBIENT_LIGHT_PARAM.intensity,
     );
     this.scene.add(this.ambientLight);
+
+
+
+
+      // ポイントスプライトをシーンに追加
+  if (this.texture) {
+    const geometry = new THREE.BufferGeometry();
+    const vertices = [];
+
+      // ランダムな位置を生成
+  for (let i = 0; i < 200; i++) {
+    let x, y, z;
+    do {
+      x = (Math.random() - 0.5) * 20; // -10から10の範囲でランダム
+      y = (Math.random() - 0.5) * 20; // -10から10の範囲でランダム
+      z = (Math.random() - 0.5) * 20; // -10から10の範囲でランダム
+    } while (Math.sqrt(x * x + y * y + z * z) < 2.0); // 半径2.0以内を避ける
+
+    vertices.push(x, y, z);
+  }
+
+
+    // const vertices = new Float32Array([
+    //   -1.0, -1.0, 0.0,
+    //    1.0, -1.0, 0.0,
+    //    1.0,  1.0, 0.0,
+    //   -1.0,  1.0, 0.0,
+
+    //       // 追加のポイント
+    //  2.0,  2.0, 0.0,
+    //  -2.0, -2.0, 0.0,
+    //   3.0,  3.0, 0.0,
+    //  -3.0, -3.0, 0.0,
+
+
+    //  2.1,  2.1, 0.0,
+    //  -2.1, -2.0, 0.0,
+    //   3.0,  3.0, 0.0,
+    //  -3.0, -3.0, 0.0,
+    // ]);
+    // geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+    const material = new THREE.PointsMaterial({
+      // size: 1.0,
+      size: 1.0,
+      map: this.texture,
+      transparent: true,
+    });
+    this.points = new THREE.Points(geometry, material);
+    this.scene.add(this.points);
+  }
+
+
 
 
     // // スポットライトを追加
@@ -278,12 +334,18 @@ class ThreeApp {
           model.position.y -= -0.25;
           // model.position.z += 0.4; // 例: モデル1のz座標を0.4増加
           model.rotation.y = angle + Math.PI / 6; // +30度回転させる @@@
-          break;
-          case 2:
+        break;
+        case 2:
             model.position.y -= 0.25; // 例: モデル2のy座標を0.1減少
             model.rotation.y = angle + Math.PI / -6; // +30度回転させる @@@
         // model.position.y -= 0.1; // 例: モデル2のy座標を0.1減少
         // model.position.z -= 0.2; // 例: モデル2のz座標を0.2減少
+        break;
+        case 3:
+          model.position.y -= 0.25; // 例: モデル2のy座標を0.1減少
+          model.rotation.y = angle + Math.PI / -6; // +30度回転させる @@@
+      // model.position.y -= 0.1; // 例: モデル2のy座標を0.1減少
+      // model.position.z -= 0.2; // 例: モデル2のz座標を0.2減少
         break;
       // 他のモデルも同様に微調整
     }
@@ -311,12 +373,12 @@ class ThreeApp {
       'assets/data/hart-3.glb',
       'assets/data/doguneko-3.glb',
       'assets/data/hart-4.glb',
-      'assets/data/doguneko-3.glb',
+      'assets/data/reforet4_2_2.glb',
       'assets/data/hart-5.glb',
       'assets/data/dogu_dammy1.glb',
       'assets/data/hart-6.glb',
       'assets/data/dogu_dammy1.glb',
-      'assets/data/hart-6.glb',
+      'assets/data/reforet4_2.glb',
     ];
     const loader = new GLTFLoader();
     const promises = modelPaths.map((path) => {
@@ -351,6 +413,22 @@ class ThreeApp {
         }, undefined, reject);
       });
     }
+
+
+    /**
+ * ポイントスプライト用のテクスチャを読み込む
+ * @returns {Promise<void>}
+ */
+load(): Promise<void> {
+  return new Promise<void>((resolve) => {
+    const imagePath = 'assets/img/pen_2.png';
+    const loader = new THREE.TextureLoader();
+    loader.load(imagePath, (texture) => {
+      this.texture = texture;
+      resolve();
+    });
+  });
+}
 
 
 
