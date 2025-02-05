@@ -19,9 +19,6 @@ import { GLTFLoader } from '../lib/GLTFLoader.js'; // glTF のローダーを追
 
 window.addEventListener('DOMContentLoaded', async () => {
   const wrapper = document.querySelector('#webgl');
-  const isSP = window.innerWidth <= 768;
-
-
   const app = new ThreeApp(wrapper);
   await app.loadModels(); // loadModels に変更 @@@
   await app.loadBaseModel(); // loadModels に変更 @@@
@@ -29,25 +26,11 @@ window.addEventListener('DOMContentLoaded', async () => {
   app.init();
   app.render();
   const canvas = app.renderer.domElement;
-  // canvas.style.width = `${window.innerWidth - 400}px`;
-  // canvas.style.height = `${window.innerHeight}px`;
-
-    // マウス座標を正規化
-    if (isSP) {
-      // SPの場合、高さから-200
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight -200}px`;
-    } else {
-      // PCの場合、高さから-400
-      canvas.style.width = `${window.innerWidth - 400}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-  }
-
-
+  canvas.style.width = `${window.innerWidth - 400}px`;
+  canvas.style.height = `${window.innerHeight}px`;
 }, false);
 
 class ThreeApp {
-  static isSP2 = window.innerWidth <= 768;
   /**
    * カメラ定義のための定数
    */
@@ -55,8 +38,7 @@ class ThreeApp {
     // fovy: 60,
     fovy: 40,
     // aspect: window.innerWidth / window.innerHeight,
-    // aspect: (window.innerWidth - 400) / window.innerHeight, // 400px 引いた幅に基づいて計算
-    aspect: this.isSP2 ? window.innerWidth / (window.innerHeight - 200) : (window.innerWidth - 400) / window.innerHeight,
+    aspect: (window.innerWidth - 400) / window.innerHeight, // 400px 引いた幅に基づいて計算
     near: 0.1,
     far: 50.0,
     position: new THREE.Vector3(0.0, 2.0, 10.0),
@@ -68,10 +50,8 @@ class ThreeApp {
   static RENDERER_PARAM = {
     // clearColor: 0xfcfce2,
     clearColor: 0xc9b9a8,
-    // width: window.innerWidth - 400, // 400px 引いた幅に設定
-    width: this.isSP2 ? window.innerWidth : window.innerWidth - 400,
-    // height: window.innerHeight,
-    height: this.isSP2 ? window.innerHeight - 200 : window.innerHeight,
+    width: window.innerWidth - 400, // 400px 引いた幅に設定
+    height: window.innerHeight,
   };
   /**
    * 平行光源定義のための定数
@@ -144,8 +124,8 @@ class ThreeApp {
   baseModel;
   texture;
   points;
-
-  isSP2;
+  opacityDirection = 1;  // 点滅の方向（増加・減少）
+  fadeSpeed = 1;  // 点滅の速さ
 
   /**
    * コンストラクタ
@@ -155,6 +135,9 @@ class ThreeApp {
   constructor(wrapper) {
     // 初期化時に canvas を append できるようにプロパティに保持
     this.wrapper = wrapper;
+
+    this.opacityDirection = 1;  // 点滅の方向（増加・減少）
+    this.fadeSpeed = 1;  // 点滅の速さ
 
     // this のバインド
     this.render = this.render.bind(this);
@@ -262,6 +245,7 @@ class ThreeApp {
       size: 1.0,
       map: this.texture,
       transparent: true,
+      opacity: 1.0,  // 初期の不透明度
     });
     this.points = new THREE.Points(geometry, material);
     this.scene.add(this.points);
@@ -401,7 +385,6 @@ class ThreeApp {
       'assets/data/hart-6.glb',
       'assets/data/dogu_dammy1.glb',
       'assets/data/reforet4_2.glb',
-      'assets/data/raforet2_2.glb',
     ];
     const loader = new GLTFLoader();
     const promises = modelPaths.map((path) => {
@@ -476,19 +459,8 @@ load(): Promise<void> {
   onMouseMove(event) {
     // マウス座標を正規化
     // this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    // this.mouse.x = (event.clientX / (window.innerWidth - 400)) * 2 - 1;
-    // this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    if (this.isSP2) {
-      // SPの場合、高さから-200
-      this.mouse.x = (event.clientX / (window.innerWidth)) * 2 - 1;
-      this.mouse.y = -(event.clientY / window.innerHeight - 200) * 2 + 1;
-  } else {
-      // PCの場合、高さから-400
-      this.mouse.x = (event.clientX / (window.innerWidth - 400)) * 2 - 1;
-      this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-  }
-
+    this.mouse.x = (event.clientX / (window.innerWidth - 400)) * 2 - 1;
+    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
     // レイキャストを設定
     this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -528,22 +500,6 @@ load(): Promise<void> {
     this.mouse.x = (event.clientX / (window.innerWidth - 400)) * 2 - 1;
     this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        // デバイス判定
-
-    if(this.isSP2) {
-          // マウス座標を正規化
-    this.mouse.x = (event.clientX / (window.innerWidth)) * 2 - 1;
-    this.mouse.y = -(event.clientY / window.innerHeight - 200) * 2 + 1;
-
-    } else {
-          // マウス座標を正規化
-    this.mouse.x = (event.clientX / (window.innerWidth - 400)) * 2 - 1;
-    this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    }
-
-
-
-
     // レイキャストを設定
     this.raycaster.setFromCamera(this.mouse, this.camera);
 
@@ -556,7 +512,7 @@ load(): Promise<void> {
 
     // 最初に交差したオブジェクトの色を変更
     if (intersects.length > 0) {
-      // intersects[0].object.material.color.set(0x00ff00); // 緑色に変更
+      intersects[0].object.material.color.set(0x00ff00); // 緑色に変更
       console.log('クリックされました');
 
       // 交差したオブジェクトに対応する modalListItem に ._show クラスを付与
@@ -583,6 +539,8 @@ load(): Promise<void> {
     // 恒常ループ
     requestAnimationFrame(this.render);
 
+
+
     // グループを回転させる @@@
     if (this.objectGroup) {
       this.objectGroup.rotation.y -= 0.001; // Y軸回転
@@ -599,6 +557,37 @@ load(): Promise<void> {
       this.hoveredObject.userData.mixer.update(delta);
     }
 
+    
+    // // 点滅の計算（opacityが0と1の間で変化）
+    // this.points.material.opacity += this.opacityDirection * this.fadeSpeed * delta;
+
+    // // opacityが0または1に達したら、増減方向を反転
+    // if (this.points.material.opacity >= 1.0 || this.points.material.opacity <= 0.0) {
+    //   this.opacityDirection *= -1;
+    // }
+
+
+      // 点滅処理: opacity を増減させる
+  if (this.points) {
+    // 現在の opacity を取得
+    let opacity = this.points.material.opacity;
+
+    // 点滅処理 (増加または減少)
+    opacity += this.opacityDirection * this.fadeSpeed * delta; 
+
+    // opacity の範囲を 0 と 1 の間に制限
+    if (opacity >= 1.0) {
+      opacity = 1.0;
+      this.opacityDirection = -1; // 透明度が 1 になったら減少方向に変更
+    } else if (opacity <= 0.0) {
+      opacity = 0.0;
+      this.opacityDirection = 1; // 透明度が 0 になったら増加方向に変更
+    }
+
+    // 新しい opacity を設定
+    this.points.material.opacity = opacity;
+  }
+
     // コントロールを更新
     this.controls.update();
 
@@ -606,3 +595,7 @@ load(): Promise<void> {
     this.renderer.render(this.scene, this.camera);
   }
 }
+
+
+
+
